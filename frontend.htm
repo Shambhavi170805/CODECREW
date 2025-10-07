@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Authentication Module</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .auth-container {
+            background: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-width: 320px;
+        }
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        .options {
+            margin-bottom: 1.5rem;
+        }
+        .options label {
+            margin-right: 1.5rem;
+            font-weight: 500;
+        }
+        .hidden {
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.3rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: #d8000c;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Who are you?</h2>
+        <form id="roleForm">
+            <div class="options">
+                <label>
+                    <input type="radio" name="role" value="student"> Student
+                </label>
+                <label>
+                    <input type="radio" name="role" value="faculty"> Faculty
+                </label>
+                <label>
+                    <input type="radio" name="role" value="admin"> Admin
+                </label>
+            </div>
+            <button type="submit">Next</button>
+        </form>
+
+        <form id="loginForm" class="hidden">
+            <div class="form-group">
+                <label for="userId">ID:</label>
+                <input type="text" id="userId" name="userId" required>
+            </div>
+            <div class="form-group">
+                <label for="userPassword">Password:</label>
+                <input type="password" id="userPassword" name="userPassword" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div id="errorMsg" class="error hidden"></div>
+    </div>
+    <script>
+        const roleForm = document.getElementById('roleForm');
+        const loginForm = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+        let selectedRole = '';
+
+        roleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const role = document.querySelector('input[name="role"]:checked');
+            if (!role) {
+                errorMsg.textContent = "Please select your role.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            selectedRole = role.value;
+            roleForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            errorMsg.classList.add('hidden');
+        });
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('userId').value.trim();
+            const password = document.getElementById('userPassword').value.trim();
+
+            if (!id || !password) {
+                errorMsg.textContent = "Please enter both ID and password.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Dummy authentication logic (replace with real backend call)
+            if (id === "test" && password === "1234") {
+                errorMsg.classList.add('hidden');
+                alert(`Welcome, ${selectedRole}!`);
+                // Redirect or further logic here
+            } else {
+                errorMsg.textContent = "Invalid ID or password.";
+                errorMsg.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
