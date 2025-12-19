@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "roomId": 101,
+    "faculty": "ASD",
+    "subject": "JH",
+    "startTime": 1100,
+    "endTime": 1200,
+    "day": 1,
+    "status": "cancelled"
+  },
+  {
+    "id": 2,
+    "roomId": 103,
+    "faculty": "SDF",
+    "subject": "DF",
+    "startTime": 900,
+    "endTime": 1000,
+    "day": 1,
+    "status": "cancelled"
+  },
+  {
+    "id": 3,
+    "roomId": 101,
+    "faculty": "Dr.Test",
+    "subject": "AI",
+    "startTime": 900,
+    "endTime": 1000,
+    "day": 1,
+    "status": "cancelled"
+  },
+  {
+    "id": 4,
+    "roomId": 103,
+    "faculty": "Akshay",
+    "subject": "ds",
+    "startTime": 900,
+    "endTime": 1000,
+    "day": 1,
+    "status": "confirmed"
+  },
+  {
+    "id": 5,
+    "roomId": 101,
+    "faculty": "pdf",
+    "subject": "hgf",
+    "startTime": 900,
+    "endTime": 1000,
+    "day": 1,
+    "status": "cancelled"
+  },
+  {
+    "id": 6,
+    "roomId": 102,
+    "faculty": "Dr.B",
+    "subject": "Y",
+    "startTime": 1100,
+    "endTime": 1200,
+    "day": 1,
+    "status": "confirmed"
+  },
+  {
+    "id": 7,
+    "roomId": 101,
+    "faculty": "SUJAL",
+    "subject": "C",
+    "startTime": 1000,
+    "endTime": 1100,
+    "day": 1,
+    "status": "confirmed"
+  },
+  {
+    "id": 8,
+    "roomId": 101,
+    "faculty": "NewProf",
+    "subject": "Test",
+    "startTime": 900,
+    "endTime": 1000,
+    "day": 1,
+    "status": "confirmed"
+  }
+]

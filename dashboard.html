@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TrackMyClass — Dashboard</title>
+  <style>
+    :root{--accent:#0b66ff;--bg:#f4f6f8;--card:#fff;--muted:#e6e9ef;--text:#1f2d3d}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text)}
+    body {background-image:url('https://dl.geu.ac.in/uploads/image/qXNfrGmJ-unleash-your-potential-at-graphic-era-university.jpg');background-size:cover;background-position:center;background-repeat:no-repeat}
+    .topnav{position:fixed;inset:0 0 auto 0;height:64px;background:rgba(255,255,255,0.45);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:0 6px 24px rgba(0,0,0,.08);z-index:40;backdrop-filter:blur(12px)}
+    .topnav .brand{font-size:20px;color:var(--accent);font-weight:900}
+    .topnav .top-links{display:flex;gap:10px;align-items:center}
+    .topnav .top-links button{background:0;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+    .topnav .top-links button:hover{background:#f0f7ff}
+    body{padding-top:72px}
+    .main{flex:1;padding:24px}
+    .welcome{font-size:16px;color:#55616a}
+    .content{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.04);min-height:360px}
+    .classroom{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px}
+    .classroom .info{background:#f8fbff;padding:12px;border-radius:8px;border:1px solid #e6eef8}
+    .uni{font-weight:700;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.18);backdrop-filter:blur(6px);box-shadow:0 2px 8px rgba(0,0,0,0.06);white-space:nowrap}
+    .uni-bar{display:flex;justify-content:flex-end;padding:8px 20px;margin-top:6px}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+    .stat-card{background:linear-gradient(135deg,#f0f7ff 0%,#e6eef8 100%);padding:16px;border-radius:8px;border-left:4px solid var(--accent)}
+    .stat-label{font-size:12px;color:#55616a}
+    .stat-value{font-size:24px;font-weight:900;color:var(--accent);margin-top:4px}
+    .loading{text-align:center;padding:20px;color:#55616a}
+    .spinner{display:inline-block;width:20px;height:20px;border:3px solid #e6e9ef;border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .error{color:#dc3545;padding:12px;background:#fff3cd;border-radius:8px;margin:12px 0}
+    .form-group{margin:12px 0}
+    .form-group label{display:block;font-weight:700;margin-bottom:4px}
+    .form-group input,.form-group select{width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:8px;font-size:14px}
+    .btn-primary{background:var(--accent);color:#fff;border:0;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700}
+    .btn-primary:hover{opacity:0.9}
+    .table{width:100%;border-collapse:collapse;margin:12px 0}
+    .table th{background:#f0f7ff;padding:10px;text-align:left;font-weight:700}
+    .table td{padding:10px;border-bottom:1px solid #e6e9ef}
+    .badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:700}
+    .badge-success{background:#d4edda;color:#155724}
+    .badge-warning{background:#fff3cd;color:#856404}
+    .badge-danger{background:#f8d7da;color:#721c24}
+    .calendar{margin:20px 0;background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .calendar-header h3{margin:0;font-size:18px}
+    .calendar-nav{display:flex;gap:10px}
+    .calendar-nav button{padding:8px 12px;border:1px solid var(--muted);background:var(--card);border-radius:4px;cursor:pointer}
+    .calendar-nav button:hover{background:var(--bg)}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+    .calendar-day-header{text-align:center;font-weight:700;color:var(--accent);padding:10px 0;font-size:12px}
+    .calendar-day{padding:12px;border:1px solid var(--muted);border-radius:4px;min-height:80px;background:var(--card);font-size:12px;cursor:pointer;transition:all 0.2s}
+    .calendar-day:hover{background:#f0f7ff;box-shadow:0 2px 8px rgba(11,102,255,0.1)}
+    .calendar-day.today{background:#e6f3ff;border:2px solid var(--accent)}
+    .calendar-day-number{font-weight:700;color:var(--accent);margin-bottom:6px}
+    .calendar-day-events{font-size:11px;color:#666}
+    .calendar-event{background:var(--accent);color:white;padding:3px 6px;border-radius:3px;margin:2px 0;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .schedule-table{width:100%;border-collapse:collapse;margin-top:12px}
+    .schedule-table th{background:linear-gradient(135deg,#f0f7ff 0%,#e6eef8 100%);padding:12px;text-align:left;font-weight:700;border-bottom:2px solid var(--accent)}
+    .schedule-table td{padding:12px;border-bottom:1px solid var(--muted)}
+    .schedule-table tr:hover{background:#f8fbff}
+  .terminal{background:#0b1220;color:#e6fffa;border-radius:8px;padding:12px;font-family:monospace;white-space:pre-wrap;overflow:auto;max-height:320px}
+  .terminal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .terminal-title{font-weight:800;color:#9be7ff}
+  /* Top-right logo container (fixed) */
+  #siteLogoTopContainer{position:fixed;top:12px;right:16px;z-index:80;display:flex;align-items:center;gap:8px}
+  #siteLogoTopContainer img{width:64px;height:64px;border-radius:10px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,0.12);border:2px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);}
+  </style>
+</head>
+<body>
+    <div class="topnav" role="navigation">
+        <div class="left" style="display:flex;align-items:center;gap:12px">
+              <button id="sidebarToggle" style="padding:8px;border-radius:8px;border:0;cursor:pointer;background:#eef6ff">☰</button>
+              <div class="brand">TrackMyClass</div>
+            </div>
+        <div class="center top-links" style="display:flex;gap:6px;align-items:center;justify-content:center;flex:1">
+          <button class="nav-item" data-action="home">Home</button>
+          <button class="nav-item" data-action="schedules">Schedules</button>
+          <button class="nav-item" data-action="book">Book</button>
+          <button class="nav-item" data-action="update">Update</button>
+          <button class="nav-item" data-action="search">Search</button>
+          <button class="nav-item" data-action="profile">My Profile</button>
+          <button class="nav-item" data-action="help">Help</button>
+          <button class="nav-item" data-action="settings">Settings</button>
+        </div>
+        <div class="right" style="display:flex;align-items:center;gap:12px">
+          <div class="welcome" id="welcomeMsg">Welcome</div>
+          <button id="logoutBtn" style="margin-left:6px;background:#dc3545;color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;">Logout</button>
+        </div>
+    </div>
+    <!-- Fixed top-right logo (tries local asset then falls back to inline SVG) -->
+    <div id="siteLogoTopContainer">
+      <img id="siteLogoTop" src="assets/tmc-logo.jpeg" alt="TrackMyClass Logo" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect rx=%2210%22 width=%22100%25%22 height=%22100%25%22 fill=%22%230b66ff%22/><text x=%2250%25%22 y=%2254%25%22 font-family=%22Arial%22 font-weight=%22700%22 font-size=%2228%22 fill=%22%23ffffff%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>TMC</text></svg>'" />
+    </div>
+
+    <div class="uni-bar">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;width:100%;">
+        <div class="uni">Graphic Era University</div>
+      </div>
+    </div>
+    <main class="main">
+      <section class="content" id="contentArea">
+        <h2 id="sectionTitle">Home</h2>
+        <p id="contentPlaceholder">Loading...</p>
+        <div id="contentBody"></div>
+      </section>
+    </main>
+
+  <script>
+  const API_BASE = 'http://localhost:3000/api';
+  
+  const welcomeMsg = document.getElementById('welcomeMsg');
+  const sectionTitle = document.getElementById('sectionTitle');
+  const contentPlaceholder = document.getElementById('contentPlaceholder');
+  const contentBody = document.getElementById('contentBody');
+  const navItems = document.querySelectorAll('.nav-item');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  let currentDay = 1;
+
+  function showLoading() {
+    contentPlaceholder.innerHTML = '<div class="loading"><div class="spinner"></div> Loading...</div>';
+    contentBody.innerHTML = '';
+  }
+
+  function showError(message) {
+    contentPlaceholder.innerHTML = '';
+    contentBody.innerHTML = '<div class="error">Error: ' + message + '</div>';
+  }
+
+  function showContent(html) {
+    contentPlaceholder.innerHTML = '';
+    contentBody.innerHTML = html;
+  }
+
+  function timeFormat(time) {
+    const h = Math.floor(time / 100);
+    const m = time % 100;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+
+  async function fetchClassrooms() {
+    try {
+      const res = await fetch(API_BASE + '/classrooms');
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      showError('Failed to fetch classrooms: ' + error.message);
+      return [];
+    }
+  }
+
+  async function fetchSchedules(day) {
+    try {
+      const url = day ? API_BASE + '/schedules?day=' + day : API_BASE + '/schedules';
+      const res = await fetch(url);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      showError('Failed to fetch schedules: ' + error.message);
+      return [];
+    }
+  }
+
+  async function fetchDashboardSummary() {
+    try {
+      const res = await fetch(API_BASE + '/dashboard');
+      const data = await res.json();
+      return data.data || {};
+    } catch (error) {
+      showError('Failed to fetch dashboard: ' + error.message);
+      return {};
+    }
+  }
+
+  async function fetchFaculty() {
+    try {
+      const res = await fetch(API_BASE + '/faculty');
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      showError('Failed to fetch faculty: ' + error.message);
+      return [];
+    }
+  }
+
+  async function renderHome() {
+    showLoading();
+    sectionTitle.textContent = 'Home';
+    
+    const summary = await fetchDashboardSummary();
+    const classrooms = await fetchClassrooms();
+    const schedules = await fetchSchedules();
+
+    let html = '<h2>Dashboard Summary</h2><div class="stats-grid">';
+    html += '<div class="stat-card"><div class="stat-label">Total Classrooms</div><div class="stat-value">' + (summary.totalClassrooms || 0) + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">Occupied</div><div class="stat-value" style="color:#dc3545">' + (summary.occupiedClassrooms || 0) + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">Vacant</div><div class="stat-value" style="color:#28a745">' + (summary.vacantClassrooms || 0) + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">Faculty</div><div class="stat-value">' + (summary.totalFaculty || 0) + '</div></div>';
+    html += '</div>';
+
+    // Calendar Widget
+    html += '<div class="calendar">';
+    html += '<div class="calendar-header">';
+    html += '<h3>📅 Weekly Calendar (Monday - Friday)</h3>';
+    html += '<div class="calendar-nav">';
+    html += '<button onclick="previousWeek()">← Previous</button>';
+    html += '<button onclick="renderHome()">Today</button>';
+    html += '<button onclick="nextWeek()">Next →</button>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Calendar grid headers
+    html += '<div class="calendar-grid">';
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    dayNames.forEach(day => {
+      html += '<div class="calendar-day-header">' + day + '</div>';
+    });
+    
+    // Calendar days with events
+    for (let day = 1; day <= 5; day++) {
+      html += '<div class="calendar-day">';
+      html += '<div class="calendar-day-number">Day ' + day + '</div>';
+      html += '<div class="calendar-day-events">';
+      
+      // Find events for this day
+      const dayEvents = schedules.filter(s => s.day === day);
+      if (dayEvents.length === 0) {
+        html += '<em style="color:#aaa">No classes</em>';
+      } else {
+        dayEvents.slice(0, 3).forEach(event => {
+          const startStr = timeFormat(event.startTime);
+          html += '<div class="calendar-event">' + startStr + ' ' + (event.subject || 'Class') + '</div>';
+        });
+        if (dayEvents.length > 3) {
+          html += '<div style="color:#0b66ff;margin-top:4px">+' + (dayEvents.length - 3) + ' more</div>';
+        }
+      }
+      
+      html += '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+    html += '</div>';
+
+    html += '<h3 style="margin-top:24px">Available Classrooms</h3><div class="classroom">';
+
+    classrooms.forEach(c => {
+      const badge = c.status === 'occupied' ? '<span class="badge badge-danger">OCCUPIED</span>' : '<span class="badge badge-success">VACANT</span>';
+      html += '<div class="info"><strong>' + c.name + '</strong><br/><small>Capacity: ' + c.capacity + ' | ' + badge + '</small><br/><small>Equipment: ' + c.equipment.join(', ') + '</small><br/><small style="color:#666">' + c.location + '</small></div>';
+    });
+
+    html += '</div>';
+    showContent(html);
+  }
+
+  window.previousWeek = function() {
+    currentDay = Math.max(1, currentDay - 7);
+    renderHome();
+  };
+
+  window.nextWeek = function() {
+    currentDay = Math.min(5, currentDay + 7);
+    renderHome();
+  };
+
+  async function renderSearch() {
+    showLoading();
+    sectionTitle.textContent = 'Search';
+
+    const faculty = await fetchFaculty();
+    const classroomsList = await fetchClassrooms();
+
+    let html = '<h2>Search & Find</h2>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">';
+    html += '<button class="btn-primary" onclick="switchSearchType(1)" style="padding:12px">1️⃣ Faculty Location</button>';
+    html += '<button class="btn-primary" onclick="switchSearchType(2)" style="padding:12px">2️⃣ Classroom Info</button>';
+    html += '<button class="btn-primary" onclick="switchSearchType(3)" style="padding:12px">3️⃣ Vacancy Check</button>';
+    html += '</div>';
+
+    // Search Type 1: Faculty Location
+    html += '<div id="search1" style="display:block">';
+    html += '<h3>Search 1: Faculty Location</h3>';
+    html += '<div class="form-group"><label>Select Faculty:</label><select id="facultySelect" style="width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:8px"><option value="">-- Select Faculty --</option>';
+    faculty.forEach(f => {
+      html += '<option value="' + f.name + '">' + f.name + ' (' + f.department + ')</option>';
+    });
+    html += '</select></div>';
+    html += '<button class="btn-primary" onclick="searchFacultyLocation()">Find Faculty</button>';
+    html += '<div id="searchResult1" style="margin-top:16px"></div>';
+    html += '</div>';
+
+    // Search Type 2: Classroom Info
+    html += '<div id="search2" style="display:none">';
+    html += '<h3>Search 2: Classroom Information</h3>';
+    html += '<div class="form-group"><label>Select Classroom:</label><select id="classroomSelect" style="width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:8px"><option value="">-- Select Classroom --</option>';
+    classroomsList.forEach(c => {
+      html += '<option value="' + c.id + '">' + c.name + ' (Capacity: ' + c.capacity + ')</option>';
+    });
+    html += '</select></div>';
+    html += '<button class="btn-primary" onclick="searchClassroomInfo()">Get Info</button>';
+    html += '<div id="searchResult2" style="margin-top:16px"></div>';
+    html += '</div>';
+
+    // Search Type 3: Vacancy Check
+    html += '<div id="search3" style="display:none">';
+    html += '<h3>Search 3: Check Classroom Vacancy</h3>';
+    html += '<div class="form-group"><label>Time (Hour, e.g., 9, 10, 11):</label><input type="number" id="vacancyTime" style="width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:8px" min="0" max="23" placeholder="e.g., 10"/></div>';
+    html += '<div class="form-group"><label>Day:</label><select id="vacancyDay" style="width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:8px"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option></select></div>';
+    html += '<button class="btn-primary" onclick="searchVacancy()">Check Vacancy</button>';
+    html += '<div id="searchResult3" style="margin-top:16px"></div>';
+    html += '</div>';
+
+    showContent(html);
+
+    window.switchSearchType = function(type) {
+      for (let i = 1; i <= 3; i++) {
+        const elem = document.getElementById('search' + i);
+        if (elem) elem.style.display = (i === type) ? 'block' : 'none';
+      }
+    };
+
+    window.searchFacultyLocation = async function() {
+      const facultyName = document.getElementById('facultySelect').value;
+      if (!facultyName) {
+        document.getElementById('searchResult1').innerHTML = '<div class="error">Please select a faculty</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + '/faculty-location/' + facultyName);
+        const result = await res.json();
+        if (result.success) {
+          const data = result.data;
+          document.getElementById('searchResult1').innerHTML = '<div class="info" style="background:#e6f3ff;border-left:4px solid var(--accent);padding:16px;margin-top:12px"><strong>📍 ' + data.faculty + '</strong><br/><strong>Classroom:</strong> ' + data.classroom + '<br/><strong>Subject:</strong> ' + data.subject + '<br/><strong>Time:</strong> ' + data.time + '<br/><strong>Day:</strong> ' + data.day + '</div>';
+        } else {
+          document.getElementById('searchResult1').innerHTML = '<div class="error">' + result.message + '</div>';
+        }
+      } catch (error) {
+        document.getElementById('searchResult1').innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+      }
+    };
+
+    window.searchClassroomInfo = async function() {
+      const roomId = document.getElementById('classroomSelect').value;
+      if (!roomId) {
+        document.getElementById('searchResult2').innerHTML = '<div class="error">Please select a classroom</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + '/search/classroom?id=' + roomId);
+        const result = await res.json();
+        if (result.success) {
+          const data = result.data;
+          let html = '<div class="info" style="background:#e6f3ff;border-left:4px solid var(--accent);padding:16px;margin-top:12px">';
+          html += '<strong>🏫 ' + data.name + '</strong><br/>';
+          html += '<strong>Capacity:</strong> ' + data.capacity + ' seats<br/>';
+          html += '<strong>Equipment:</strong> ' + data.equipment.join(', ') + '<br/>';
+          html += '<strong>Location:</strong> ' + data.location + '<br/>';
+          html += '<strong>Status:</strong> <span class="badge ' + (data.status === 'vacant' ? 'badge-success' : 'badge-danger') + '">' + data.status.toUpperCase() + '</span><br/><br/>';
+          html += '<strong>Schedules:</strong><table class="table"><tr><th>Faculty</th><th>Subject</th><th>Time</th><th>Day</th></tr>';
+          if (data.schedules.length === 0) {
+            html += '<tr><td colspan="4">No schedules</td></tr>';
+          } else {
+            data.schedules.forEach(s => {
+              html += '<tr><td>' + s.faculty + '</td><td>' + s.subject + '</td><td>' + timeFormat(s.startTime) + '-' + timeFormat(s.endTime) + '</td><td>' + s.day + '</td></tr>';
+            });
+          }
+          html += '</table></div>';
+          document.getElementById('searchResult2').innerHTML = html;
+        } else {
+          document.getElementById('searchResult2').innerHTML = '<div class="error">' + result.message + '</div>';
+        }
+      } catch (error) {
+        document.getElementById('searchResult2').innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+      }
+    };
+
+    window.searchVacancy = async function() {
+      const time = document.getElementById('vacancyTime').value;
+      const day = document.getElementById('vacancyDay').value;
+      
+      if (!time) {
+        document.getElementById('searchResult3').innerHTML = '<div class="error">Please enter a time</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + '/search/vacancy?time=' + time + '&day=' + day);
+        const result = await res.json();
+        if (result.success) {
+          const data = result.data;
+          let html = '<div style="margin-top:12px"><h4>Vacant Classrooms at ' + String(result.time).padStart(2, '0') + ':00 on Day ' + result.day + '</h4>';
+          if (data.length === 0) {
+            html += '<p style="color:#dc3545">No vacant classrooms at this time</p>';
+          } else {
+            html += '<div class="classroom">';
+            data.forEach(room => {
+              html += '<div class="info" style="background:#e6f3ff;border-left:4px solid #28a745"><strong>' + room.name + '</strong><br/><small>Capacity: ' + room.capacity + '</small><br/><small>Equipment: ' + room.equipment.join(', ') + '</small><br/><small style="color:#666">' + room.location + '</small></div>';
+            });
+            html += '</div>';
+          }
+          html += '</div>';
+          document.getElementById('searchResult3').innerHTML = html;
+        } else {
+          document.getElementById('searchResult3').innerHTML = '<div class="error">' + result.message + '</div>';
+        }
+      } catch (error) {
+        document.getElementById('searchResult3').innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+      }
+    };
+  }
+
+  async function renderSchedules() {
+    showLoading();
+    sectionTitle.textContent = 'Schedules';
+
+    const schedules = await fetchSchedules();
+    const classrooms = await fetchClassrooms();
+
+    let html = '<h2>Class Schedules</h2>';
+    
+    // Day selector
+    html += '<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">';
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    days.forEach((day, idx) => {
+      const dayNum = idx + 1;
+      const isActive = currentDay === dayNum;
+      html += '<button class="btn-primary" style="' + (isActive ? 'opacity:1' : 'opacity:0.6') + '" onclick="switchDay(' + dayNum + ')">' + day + '</button>';
+    });
+    html += '</div>';
+
+    // Schedule table
+    const daySchedules = schedules.filter(s => s.day === currentDay);
+    
+    html += '<div style="overflow-x:auto">';
+    html += '<table class="schedule-table">';
+    html += '<thead><tr>';
+    html += '<th>Room No</th>';
+    html += '<th>Faculty</th>';
+    html += '<th>Subject</th>';
+    html += '<th>Start Time</th>';
+    html += '<th>End Time</th>';
+    html += '<th>Status</th>';
+    html += '</tr></thead>';
+    html += '<tbody>';
+
+    if (daySchedules.length === 0) {
+      html += '<tr><td colspan="6" style="text-align:center;padding:20px;color:#aaa">No classes scheduled for ' + days[currentDay - 1] + '</td></tr>';
+    } else {
+      daySchedules.sort((a, b) => a.startTime - b.startTime).forEach(s => {
+        const statusBadge = s.status === 'pending' ? '<span class="badge badge-warning">PENDING</span>' : 
+                           (s.status === 'confirmed' ? '<span class="badge badge-success">CONFIRMED</span>' : 
+                            '<span class="badge badge-danger">REJECTED</span>');
+        html += '<tr>';
+        html += '<td><strong>' + s.roomId + '</strong></td>';
+        html += '<td>' + (s.faculty || 'N/A') + '</td>';
+        html += '<td>' + (s.subject || 'N/A') + '</td>';
+        html += '<td>' + timeFormat(s.startTime) + '</td>';
+        html += '<td>' + timeFormat(s.endTime) + '</td>';
+        html += '<td>' + statusBadge + '</td>';
+        html += '</tr>';
+      });
+    }
+
+    html += '</tbody></table></div>';
+
+    // Classroom-wise view
+    html += '<h3 style="margin-top:30px">Classroom-wise Schedule</h3>';
+    
+    classrooms.forEach(room => {
+      const roomSchedules = daySchedules.filter(s => s.roomId === room.id);
+      const isOccupied = roomSchedules.length > 0;
+      
+      html += '<div style="margin-bottom:20px;padding:15px;background:' + (isOccupied ? '#fff3cd' : '#d4edda') + ';border-radius:8px;border-left:4px solid ' + (isOccupied ? '#ffc107' : '#28a745') + '">';
+      html += '<strong style="font-size:16px">🏫 ' + room.name + ' (Room ' + room.id + ')</strong><br/>';
+      html += '<small style="color:#666">Capacity: ' + room.capacity + ' | ' + (isOccupied ? 'OCCUPIED' : 'VACANT') + '</small><br/>';
+      
+      if (roomSchedules.length === 0) {
+        html += '<div style="margin-top:10px;color:#666"><em>No classes scheduled</em></div>';
+      } else {
+        html += '<div style="margin-top:10px">';
+        roomSchedules.sort((a, b) => a.startTime - b.startTime).forEach(s => {
+          html += '<div style="margin:6px 0;padding:8px;background:white;border-radius:4px">';
+          html += '<strong>' + s.faculty + '</strong> - ' + s.subject + '<br/>';
+          html += '<small>' + timeFormat(s.startTime) + ' to ' + timeFormat(s.endTime) + '</small>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+
+    showContent(html);
+  }
+
+  window.switchDay = function(day) {
+    currentDay = day;
+    renderSchedules();
+  };
+
+  async function renderProfile() {
+    showLoading();
+    sectionTitle.textContent = 'My Profile';
+    const role = localStorage.getItem('tmc_role');
+    const user = localStorage.getItem('tmc_user');
+    const html = '<h2>Profile</h2><div class="info" style="background:#e6f3ff;border-left:4px solid var(--accent);padding:16px"><strong>User ID:</strong> ' + user + '<br/><strong>Role:</strong> ' + (role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Unknown') + '<br/><strong>Institution:</strong> Graphic Era University<br/><strong>Login:</strong> ' + new Date().toLocaleString() + '</div>';
+    showContent(html);
+  }
+
+  async function renderHelp() {
+    showLoading();
+    sectionTitle.textContent = 'Help';
+    const html = '<h2>Help & Support</h2><h3>FAQ</h3><p><strong>Q: How to book?</strong><br/>A: Go to Schedule section to request a booking.</p><h3>Contact</h3><p>Email: support@geu.ac.in</p>';
+    showContent(html);
+  }
+
+  async function renderSettings() {
+    showLoading();
+    sectionTitle.textContent = 'Settings';
+    const html = '<h2>Settings</h2><label><input type="checkbox" checked/> Email notifications</label><br/><button class="btn-primary" style="margin-top:12px">Save</button>';
+    showContent(html);
+  }
+
+  async function renderBook() {
+    showLoading();
+    sectionTitle.textContent = 'Book Classroom';
+    const role = localStorage.getItem('tmc_role');
+    
+    // Check role-based access
+    if (role !== 'admin') {
+      showContent('<div class="error" style="background:#f8d7da;color:#721c24;padding:16px;border-radius:8px;border-left:4px solid #dc3545"><strong>⛔ Access Denied</strong><br/>Only administrators can book classrooms. Your role: <strong>' + (role || 'Unknown') + '</strong></div>');
+      return;
+    }
+    
+    try {
+      const classrooms = await fetchClassrooms();
+      let html = '<div style="max-width:600px"><h3>Book a Classroom</h3>';
+      html += '<form id="bookingForm" style="display:grid;gap:12px">';
+      html += '<div><label>Classroom:</label><select id="bookClassroom" required><option value="">Select a classroom</option>';
+      classrooms.forEach(room => {
+        html += '<option value="' + room.id + '">' + room.name + ' (Capacity: ' + room.capacity + ')</option>';
+      });
+      html += '</select></div>';
+      html += '<div><label>Faculty Name:</label><input type="text" id="bookFaculty" placeholder="e.g., Dr. Smith" required/></div>';
+      html += '<div><label>Subject:</label><input type="text" id="bookSubject" placeholder="e.g., Database Systems" required/></div>';
+      html += '<div><label>Start Time (hour 0-23):</label><input type="number" id="bookStartTime" min="0" max="23" required/></div>';
+      html += '<div><label>End Time (hour 0-23):</label><input type="number" id="bookEndTime" min="0" max="23" required/></div>';
+      html += '<div><label>Day (1-5):</label><select id="bookDay" required><option value="">Select day</option><option value="1">Day 1</option><option value="2">Day 2</option><option value="3">Day 3</option><option value="4">Day 4</option><option value="5">Day 5</option></select></div>';
+      html += '<button type="button" class="btn-primary" onclick="submitBooking()" style="margin-top:12px">Book Classroom</button>';
+      html += '<div id="bookResult"></div>';
+      html += '</form></div>';
+      // Add Run Book CLI panel (embed original book.c interactive output)
+      html += '<hr style="margin:18px 0"/>';
+      html += '<div style="margin-top:12px;max-width:800px">';
+      html += '<h4>Run Book CLI (original console program)</h4>';
+      html += '<p style="color:#666">Provide input exactly as the console program expects. The output will be shown below.</p>';
+      html += '<textarea id="bookCliInput" placeholder="Enter input for book program (\n for newlines)" style="width:100%;height:120px;padding:8px;border:1px solid #e6e9ef;border-radius:6px"></textarea>';
+      html += '<div style="display:flex;gap:8px;margin-top:8px">';
+      html += '<button class="btn-primary" onclick="runBookCli()">Run CLI</button>';
+      html += '<button onclick="document.getElementById(\'bookCliInput\').value=\'\'" style="padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer">Clear</button>';
+      html += '</div>';
+      html += '<pre id="bookCliOutput" style="white-space:pre-wrap;background:#0f1724;color:#d1fae5;padding:12px;border-radius:8px;margin-top:12px;min-height:80px;overflow:auto">CLI output will appear here</pre>';
+      html += '</div>';
+      showContent(html);
+    } catch (error) {
+      showContent('<div class="error">Error loading classrooms: ' + error.message + '</div>');
+    }
+  }
+
+  // Simple HTML-escape helper for CLI output display
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  window.submitBooking = async function() {
+    const roomId = document.getElementById('bookClassroom').value;
+    const faculty = document.getElementById('bookFaculty').value;
+    const subject = document.getElementById('bookSubject').value;
+    const startTime = document.getElementById('bookStartTime').value;
+    const endTime = document.getElementById('bookEndTime').value;
+    const day = document.getElementById('bookDay').value;
+    const role = localStorage.getItem('tmc_role');
+
+    if (!roomId || !faculty || !subject || !startTime || !endTime || !day) {
+      document.getElementById('bookResult').innerHTML = '<div class="error">Please fill all fields</div>';
+      return;
+    }
+
+    if (parseInt(endTime) <= parseInt(startTime)) {
+      document.getElementById('bookResult').innerHTML = '<div class="error">End time must be after start time</div>';
+      return;
+    }
+
+    try {
+      // Use the original compiled CLI (book) for booking so behavior matches C program
+      // Convert hour inputs (0-23) to HHMM format expected by CLI (e.g., 9 -> 900)
+      const startHHMM = String(parseInt(startTime) * 100);
+      const endHHMM = String(parseInt(endTime) * 100);
+
+      // Build stdin sequence for the book CLI:
+      // 1 (Admin Login) -> adminId -> adminPass -> 2 (Book Classroom) -> id, faculty, subject, start, end -> 6 (Exit)
+      // NOTE: original C uses default admin credentials 'test'/'1234'. We inject those here.
+      const adminId = 'test';
+      const adminPass = '1234';
+      let cliInput = '';
+      cliInput += '1\n';
+      cliInput += adminId + '\n';
+      cliInput += adminPass + '\n';
+      cliInput += '2\n';
+      cliInput += String(roomId) + '\n';
+      cliInput += faculty + '\n';
+      cliInput += subject + '\n';
+      cliInput += startHHMM + '\n';
+      cliInput += endHHMM + '\n';
+      // exit program after booking
+      cliInput += '6\n';
+
+      const res = await fetch(API_BASE + '/run_book_cli', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: cliInput
+      });
+      const result = await res.json();
+
+  // Combine stdout/stderr and inspect for success markers
+  const fullOut = (result.output || '') + '\n' + (result.error || '');
+      if (result.success && /Booking Successful|Booking successful|Booking Successful!/i.test(fullOut)) {
+        // Persist booking to schedules.json so it appears in the Schedules/calendar
+        try {
+          const persistRes = await fetch(API_BASE + '/persist_booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              roomId: parseInt(roomId),
+              faculty: faculty,
+              subject: subject,
+              startTime: parseInt(startHHMM),
+              endTime: parseInt(endHHMM),
+              day: parseInt(day),
+              status: 'confirmed'
+            })
+          });
+          const persistJson = await persistRes.json();
+          if (persistJson.success) {
+            document.getElementById('bookResult').innerHTML = '<div class="success" style="color:#28a745;background:#d4edda;padding:12px;border-radius:4px">✓ Booking Successful (via CLI) and saved to schedules.<br/><pre style="white-space:pre-wrap;background:transparent;border:none;margin:0;padding-top:6px">' + escapeHtml(fullOut) + '</pre></div>';
+            document.getElementById('bookingForm').reset();
+            // show terminal output panel as well
+            showTerminalOutput('Booking Terminal Output', fullOut);
+          } else {
+            document.getElementById('bookResult').innerHTML = '<div class="error">CLI success but failed to persist booking: ' + escapeHtml(persistJson.message || 'Unknown') + '<br/><pre>' + escapeHtml(fullOut) + '</pre></div>';
+            showTerminalOutput('Booking Terminal Output (persist failed)', fullOut + '\n\nPersist error: ' + (persistJson.message || 'Unknown'));
+          }
+        } catch (err) {
+          document.getElementById('bookResult').innerHTML = '<div class="error">CLI success but error persisting booking: ' + escapeHtml(err.message) + '<br/><pre>' + escapeHtml(fullOut) + '</pre></div>';
+        }
+      } else if (result.success) {
+        // Show CLI output for debugging (conflicts, invalid input, etc.)
+        document.getElementById('bookResult').innerHTML = '<div class="error">CLI Output:<pre style="white-space:pre-wrap;">' + escapeHtml(fullOut) + '</pre></div>';
+      } else {
+        document.getElementById('bookResult').innerHTML = '<div class="error">Error: ' + escapeHtml(result.message || 'Unknown error') + '</div>';
+      }
+    } catch (error) {
+      document.getElementById('bookResult').innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+    }
+  };
+
+  // Run the original compiled book CLI (book.c) via the backend endpoint
+  window.runBookCli = async function() {
+    const input = document.getElementById('bookCliInput').value || '';
+    const out = document.getElementById('bookCliOutput');
+    out.textContent = 'Running...';
+    try {
+      const res = await fetch(API_BASE + '/run_book_cli', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: input
+      });
+      const json = await res.json();
+      if (json.success) {
+        out.textContent = json.output || '';
+        if (json.error) out.textContent += '\n\n[stderr]\n' + json.error;
+        showTerminalOutput('Book CLI Output', json.output || '' + (json.error ? '\n\n[stderr]\n' + json.error : ''));
+      } else {
+        out.textContent = 'Error: ' + (json.message || 'Unknown error');
+        showTerminalOutput('Book CLI Error', json.message || 'Unknown error');
+      }
+    } catch (err) {
+      out.textContent = 'Fetch error: ' + err.message;
+    }
+  };
+
+  async function renderUpdate() {
+    showLoading();
+    sectionTitle.textContent = 'Update Schedule';
+    const role = localStorage.getItem('tmc_role');
+
+    try {
+      const schedules = await fetchSchedules();
+      // normalize keys (support both camelCase and snake_case coming from server variations)
+      const normalize = s => ({
+        id: s.id || s.ID,
+        roomId: s.roomId || s.room_id || s.room || s.roomId,
+        faculty: s.faculty || '',
+        subject: s.subject || '',
+        startTime: s.startTime || s.start_time || s.start_time,
+        endTime: s.endTime || s.end_time || s.end_time,
+        day: s.day || 0,
+        status: s.status || 'pending'
+      });
+      const normalized = schedules.map(normalize);
+
+      let html = '<div style="max-width:900px"><h3>Bookings & Requests</h3>';
+
+      if (normalized.length === 0) {
+        html += '<p style="color:#666">No bookings available</p>';
+      } else {
+        html += '<table style="width:100%;border-collapse:collapse;margin-top:12px"><tr style="background:#f5f5f5;border-bottom:2px solid #ddd"><th style="padding:10px;text-align:left">Faculty</th><th style="padding:10px;text-align:left">Subject</th><th style="padding:10px;text-align:left">Classroom</th><th style="padding:10px;text-align:left">Time</th><th style="padding:10px;text-align:left">Day</th><th style="padding:10px;text-align:left">Status</th><th style="padding:10px;text-align:left">Action</th></tr>';
+        normalized.forEach(booking => {
+          const statusColor = booking.status === 'pending' ? '#ffc107' : (booking.status === 'confirmed' ? '#28a745' : '#dc3545');
+          const roomLabel = booking.roomId || 'N/A';
+          const startLabel = booking.startTime !== undefined ? timeFormat(parseInt(booking.startTime)) : 'N/A';
+          const endLabel = booking.endTime !== undefined ? timeFormat(parseInt(booking.endTime)) : 'N/A';
+          html += '<tr style="border-bottom:1px solid #eee"><td style="padding:10px">' + booking.faculty + '</td><td style="padding:10px">' + booking.subject + '</td><td style="padding:10px">' + roomLabel + '</td><td style="padding:10px">' + startLabel + '-' + endLabel + '</td><td style="padding:10px">Day ' + booking.day + '</td><td style="padding:10px"><span style="background:' + statusColor + ';color:white;padding:4px 8px;border-radius:4px">' + booking.status.toUpperCase() + '</span></td>';
+
+          // Action column varies by role
+          if (role === 'admin') {
+            if (booking.status === 'pending') {
+              html += '<td style="padding:10px"><button class="btn-primary" style="padding:6px 10px;margin-right:6px" onclick="updateBookingStatus(' + booking.id + ', \'' + 'confirmed' + '\')">Approve</button><button style="padding:6px 10px;background:#dc3545;color:white;border:0;border-radius:4px;cursor:pointer" onclick="updateBookingStatus(' + booking.id + ', \'' + 'rejected' + '\')">Reject</button></td>';
+            } else {
+              html += '<td style="padding:10px"><button style="padding:6px 10px;background:#dc3545;color:white;border:0;border-radius:4px;cursor:pointer" onclick="updateBookingStatus(' + booking.id + ', \'' + 'cancelled' + '\')">Cancel</button></td>';
+            }
+          } else if (role === 'faculty') {
+            // Faculty can request admin approval for a booking change
+            html += '<td style="padding:10px"><button class="btn-primary" style="padding:6px 10px" onclick="requestUpdate(' + booking.id + ')">Request Approval</button></td>';
+          } else {
+            // Students and others: view-only
+            html += '<td style="padding:10px"><em style="color:#666">View only</em></td>';
+          }
+
+          html += '</tr>';
+        });
+        // Add Run Update CLI panel (embed original update.c interactive output)
+        html += '<hr style="margin:18px 0"/>';
+        html += '<div style="margin-top:12px;max-width:800px">';
+        html += '<h4>Run Update CLI (original console program)</h4>';
+        html += '<p style="color:#666">Provide input exactly as the console program expects. The output will be shown below.</p>';
+        html += '<textarea id="updateCliInput" placeholder="Enter input for update program (\n for newlines)" style="width:100%;height:120px;padding:8px;border:1px solid #e6e9ef;border-radius:6px"></textarea>';
+        html += '<div style="display:flex;gap:8px;margin-top:8px">';
+        html += '<button class="btn-primary" onclick="runUpdateCli()">Run Update CLI</button>';
+        html += '<button onclick="document.getElementById(\'updateCliInput\').value=\'\'" style="padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer">Clear</button>';
+        html += '</div>';
+        html += '<pre id="updateCliOutput" style="white-space:pre-wrap;background:#0f1724;color:#d1fae5;padding:12px;border-radius:8px;margin-top:12px;min-height:80px;overflow:auto">CLI output will appear here</pre>';
+        html += '</div>';
+        html += '</table>';
+      }
+
+      // Request vacant classroom form (for faculty to request admin approval)
+      html += '<hr style="margin:18px 0"/>';
+      html += '<div style="margin-top:12px;max-width:700px;background:#f8fbff;padding:12px;border-radius:8px">';
+      html += '<h4>Request a Vacant Classroom (sends request to admin)</h4>';
+      html += '<div class="form-group"><label>Day (1=Mon ... 5=Fri):</label><select id="reqDay"><option value="1">1 (Mon)</option><option value="2">2 (Tue)</option><option value="3">3 (Wed)</option><option value="4">4 (Thu)</option><option value="5">5 (Fri)</option></select></div>';
+      html += '<div class="form-group"><label>Start Time (hour 0-23):</label><input type="number" id="reqStartHour" min="0" max="23" value="9"/></div>';
+      html += '<div class="form-group"><label>End Time (hour 0-23):</label><input type="number" id="reqEndHour" min="0" max="23" value="10"/></div>';
+      html += '<div class="form-group"><label>Faculty Name:</label><input type="text" id="reqFaculty" placeholder="Your name e.g., Dr. Mehta"/></div>';
+      html += '<div class="form-group"><label>Subject:</label><input type="text" id="reqSubject" placeholder="Subject e.g., AI"/></div>';
+      html += '<div style="display:flex;gap:8px"><button class="btn-primary" onclick="submitUpdateRequest()">Request Classroom</button><div id="updateRequestResult" style="margin-left:8px"></div></div>';
+      html += '</div>';
+
+      // Admin: show pending requests separately
+      if (role === 'admin') {
+        html += '<h3 style="margin-top:20px">Pending Requests</h3><div id="pendingRequestsArea">Loading pending requests...</div>';
+      }
+
+      html += '<div id="updateResult" style="margin-top:12px"></div></div>';
+      showContent(html);
+
+      // If admin, fetch requests
+      if (role === 'admin') {
+        const requests = await fetchRequests();
+        const area = document.getElementById('pendingRequestsArea');
+        if (!requests || requests.length === 0) {
+          area.innerHTML = '<p style="color:#666">No pending requests</p>';
+        } else {
+          let rh = '<table class="table"><tr><th>Request ID</th><th>Booking ID</th><th>Requester</th><th>Action</th><th>Note</th><th>Action</th></tr>';
+          requests.forEach(r => {
+            rh += '<tr><td>' + r.requestId + '</td><td>' + r.bookingId + '</td><td>' + r.requester + '</td><td>' + r.action + '</td><td>' + (r.note || '') + '</td><td><button class="btn-primary" onclick="updateBookingStatus(' + r.bookingId + ', \'' + 'confirmed' + '\')" style="margin-right:6px">Approve</button><button style="padding:6px 10px;background:#dc3545;color:white;border:0;border-radius:4px;cursor:pointer" onclick="updateBookingStatus(' + r.bookingId + ', \'' + 'rejected' + '\')">Reject</button></td></tr>';
+          });
+          rh += '</table>';
+          area.innerHTML = rh;
+        }
+      }
+
+    } catch (error) {
+      showContent('<div class="error">Error loading bookings: ' + error.message + '</div>');
+    }
+  }
+
+  window.updateBookingStatus = async function(bookingId, newStatus) {
+    const role = localStorage.getItem('tmc_role');
+    try {
+      const res = await fetch(API_BASE + '/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: bookingId,
+          status: newStatus,
+          role: role
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        document.getElementById('updateResult').innerHTML = '<div class="success" style="color:#28a745;background:#d4edda;padding:12px;border-radius:4px">✓ Booking status updated to ' + newStatus.toUpperCase() + '</div>';
+        setTimeout(() => renderUpdate(), 1500);
+      } else {
+        document.getElementById('updateResult').innerHTML = '<div class="error">Error: ' + result.message + '</div>';
+      }
+    } catch (error) {
+      document.getElementById('updateResult').innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+    }
+  };
+
+  // Run the original compiled update CLI (update.c) via the backend endpoint
+  window.runUpdateCli = async function() {
+    const input = document.getElementById('updateCliInput').value || '';
+    const out = document.getElementById('updateCliOutput');
+    out.textContent = 'Running...';
+    try {
+      const res = await fetch(API_BASE + '/run_update_cli', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: input
+      });
+      const json = await res.json();
+      if (json.success) {
+        out.textContent = json.output || '';
+        if (json.error) out.textContent += '\n\n[stderr]\n' + json.error;
+        showTerminalOutput('Update CLI Output', json.output || '' + (json.error ? '\n\n[stderr]\n' + json.error : ''));
+      } else {
+        out.textContent = 'Error: ' + (json.message || 'Unknown error');
+        showTerminalOutput('Update CLI Error', json.message || 'Unknown error');
+      }
+    } catch (err) {
+      out.textContent = 'Fetch error: ' + err.message;
+    }
+  };
+
+  // Submit a request for a vacant classroom using the update CLI, then persist as 'pending'
+  window.submitUpdateRequest = async function() {
+    const day = document.getElementById('reqDay').value;
+    const startHour = document.getElementById('reqStartHour').value;
+    const endHour = document.getElementById('reqEndHour').value;
+    const faculty = document.getElementById('reqFaculty').value || localStorage.getItem('tmc_user') || 'Unknown';
+    const subject = document.getElementById('reqSubject').value || 'Lecture';
+    const resultDiv = document.getElementById('updateRequestResult');
+
+    if (!day || startHour === '' || endHour === '') {
+      resultDiv.innerHTML = '<div class="error">Please provide day, start and end time</div>';
+      return;
+    }
+    if (parseInt(endHour) <= parseInt(startHour)) {
+      resultDiv.innerHTML = '<div class="error">End time must be after start time</div>';
+      return;
+    }
+
+    // Convert hours to HHMM format
+    const startHHMM = parseInt(startHour) * 100;
+    const endHHMM = parseInt(endHour) * 100;
+
+    // Build stdin for update CLI (faculty login -> day -> faculty name -> subject -> start -> end)
+    let cliInput = '';
+    cliInput += 'test\n';
+    cliInput += '1234\n';
+    cliInput += day + '\n';
+    cliInput += faculty + '\n';
+    cliInput += subject + '\n';
+    cliInput += String(startHHMM) + '\n';
+    cliInput += String(endHHMM) + '\n';
+
+    resultDiv.innerHTML = 'Running request...';
+    try {
+      const res = await fetch(API_BASE + '/run_update_cli', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: cliInput
+      });
+      const json = await res.json();
+      const fullOut = (json.output || '') + '\n' + (json.error || '');
+
+      // Try to parse suggested room from CLI output
+      const m = fullOut.match(/suggested:\s*(\d+)/i);
+      if (json.success && m && m[1]) {
+        const roomId = parseInt(m[1], 10);
+        // Persist as pending
+        try {
+          const persistRes = await fetch(API_BASE + '/persist_booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              roomId: roomId,
+              faculty: faculty,
+              subject: subject,
+              startTime: startHHMM,
+              endTime: endHHMM,
+              day: parseInt(day),
+              status: 'pending'
+            })
+          });
+          const persistJson = await persistRes.json();
+          if (persistJson.success) {
+            resultDiv.innerHTML = '<div class="success" style="color:#856404;background:#fff3cd;padding:12px;border-radius:6px">✓ Request submitted and pending admin approval. Suggested room: ' + roomId + '</div>';
+            showTerminalOutput('Update CLI Output', fullOut);
+            setTimeout(() => renderUpdate(), 1000);
+          } else {
+            resultDiv.innerHTML = '<div class="error">Failed to persist request: ' + escapeHtml(persistJson.message || 'Unknown') + '</div>';
+            showTerminalOutput('Update CLI (persist failed)', fullOut + '\n\nPersist error: ' + (persistJson.message || 'Unknown'));
+          }
+        } catch (pe) {
+          resultDiv.innerHTML = '<div class="error">Persist error: ' + escapeHtml(pe.message) + '</div>';
+          showTerminalOutput('Update CLI (persist exception)', fullOut + '\n\nPersist exception: ' + pe.message);
+        }
+      } else if (json.success) {
+        // CLI ran but no vacancy
+        if (/no vacant class/i.test(fullOut)) {
+          resultDiv.innerHTML = '<div class="error">No vacant classroom found at that time.</div>';
+          showTerminalOutput('Update CLI Output', fullOut);
+        } else {
+          resultDiv.innerHTML = '<div class="error">Unexpected CLI output. See terminal.</div>';
+          showTerminalOutput('Update CLI Output', fullOut);
+        }
+      } else {
+        resultDiv.innerHTML = '<div class="error">CLI error: ' + escapeHtml(json.message || 'Unknown') + '</div>';
+        showTerminalOutput('Update CLI Error', json.message || 'Unknown');
+      }
+    } catch (err) {
+      resultDiv.innerHTML = '<div class="error">Fetch error: ' + escapeHtml(err.message) + '</div>';
+    }
+  };
+
+  // Faculty: request approval for a booking change
+  window.requestUpdate = async function(bookingId) {
+    const role = localStorage.getItem('tmc_role');
+    const user = localStorage.getItem('tmc_user');
+    if (role !== 'faculty') {
+      alert('Only faculty may submit requests for admin approval');
+      return;
+    }
+
+    try {
+      const res = await fetch(API_BASE + '/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: bookingId,
+          action: 'request_approval',
+          note: 'Requested via dashboard',
+          role: role,
+          requester: user
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        document.getElementById('updateResult').innerHTML = '<div class="success" style="color:#28a745;background:#d4edda;padding:12px;border-radius:4px">✓ ' + result.message + '</div>';
+        setTimeout(() => renderUpdate(), 1200);
+      } else {
+        document.getElementById('updateResult').innerHTML = '<div class="error">Error: ' + result.message + '</div>';
+      }
+    } catch (error) {
+      document.getElementById('updateResult').innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+    }
+  };
+
+  // Fetch pending requests (admin)
+  async function fetchRequests() {
+    try {
+      const res = await fetch(API_BASE + '/requests');
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error('Failed to fetch requests', error);
+      return [];
+    }
+  }
+
+  function populateWelcome() {
+    const user = localStorage.getItem('tmc_user');
+    const role = localStorage.getItem('tmc_role');
+    if (!user) {
+      window.location.href = 'auth.htm';
+      return;
+    }
+    const label = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
+    welcomeMsg.textContent = 'Welcome, ' + label;
+    
+    // Hide Book and Update buttons for non-admin users
+    const bookBtn = document.querySelector('[data-action="book"]');
+    const updateBtn = document.querySelector('[data-action="update"]');
+    
+    // Book allowed only for admins; Update page is viewable by all roles (faculty can request updates)
+    if (bookBtn) bookBtn.style.display = (role === 'admin') ? 'inline-block' : 'none';
+    if (updateBtn) updateBtn.style.display = 'inline-block';
+  }
+
+  // Show terminal-like output panel in the content area
+  function showTerminalOutput(title, text) {
+    try {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'terminal';
+      const header = document.createElement('div');
+      header.className = 'terminal-header';
+      const t = document.createElement('div');
+      t.className = 'terminal-title';
+      t.textContent = title || 'Terminal Output';
+      header.appendChild(t);
+      wrapper.appendChild(header);
+      const pre = document.createElement('pre');
+      pre.style.background = 'transparent';
+      pre.style.border = 'none';
+      pre.style.margin = '0';
+      pre.textContent = text || '';
+      wrapper.appendChild(pre);
+      // insert at top of contentBody
+      if (contentBody.firstChild) contentBody.insertBefore(wrapper, contentBody.firstChild);
+      else contentBody.appendChild(wrapper);
+    } catch (e) {
+      console.error('showTerminalOutput error', e);
+    }
+  }
+
+  navItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (action === 'home') renderHome();
+      else if (action === 'schedules') renderSchedules();
+      else if (action === 'book') renderBook();
+      else if (action === 'update') renderUpdate();
+      else if (action === 'search') renderSearch();
+      else if (action === 'profile') renderProfile();
+      else if (action === 'help') renderHelp();
+      else if (action === 'settings') renderSettings();
+    });
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('tmc_user');
+    localStorage.removeItem('tmc_role');
+    window.location.href = 'auth.htm';
+  });
+
+  populateWelcome();
+  renderHome();
+  </script>
+</body>
+</html>
